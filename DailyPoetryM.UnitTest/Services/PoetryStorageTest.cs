@@ -8,8 +8,18 @@ using Moq;
 
 namespace DailyPoetryM.UnitTest.Services
 {
-    public class PoetryStorageTest
+    public class PoetryStorageTest : IDisposable
     {
+        public PoetryStorageTest()
+        {
+            File.Delete(PoetryStorage.PoetryDbPath);
+        }
+
+        public void Dispose()
+        {
+            File.Delete(PoetryStorage.PoetryDbPath);
+        }
+
         [Fact]
         public void IsInitialized_Default()
         {

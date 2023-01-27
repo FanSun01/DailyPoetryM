@@ -27,6 +27,10 @@ namespace DailyPoetryM.Services
         {
             await using var dbFileStream = new FileStream(PoetryDbPath, FileMode.OpenOrCreate);
             await using var dbAssetStream = typeof(PoetryStorage).Assembly.GetManifestResourceStream(DbName);
+            if (dbFileStream is null || dbAssetStream is null)
+            {
+                throw new NullReferenceException("dbFileStream or dbAssetStream is null");
+            }
             await dbAssetStream.CopyToAsync(dbFileStream);
             _preferenceStorage.Set(PoetryStorageConst.VersionKey, PoetryStorageConst.Version);
         }
