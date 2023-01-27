@@ -22,7 +22,16 @@ namespace DailyPoetryM.UnitTest.Services
             Assert.True(poetryStorage.IsInitialized);
         }
 
-
+        [Fact]
+        public async Task TestInitializeAsync_Default()
+        {
+            var preferenceStorageMock = new Mock<IPreferenceStorage>();
+            var mockPreferenceStorage = preferenceStorageMock.Object;
+            var poetryStorage = new PoetryStorage(mockPreferenceStorage);
+            Assert.False(File.Exists(PoetryStorage.PoetryDbPath));
+            await poetryStorage.InitializeAsync();
+            Assert.True(File.Exists(PoetryStorage.PoetryDbPath));
+        }
 
 
 

@@ -14,14 +14,21 @@ namespace DailyPoetryM.Services
         private readonly IPreferenceStorage _preferenceStorage;
         public bool IsInitialized => _preferenceStorage.Get(PoetryStorageConst.VersionKey, 0) == PoetryStorageConst.Version;
 
+        public const string DbName = "poetrydb.sqllite3";
+
+        public static readonly string PoetryDbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), DbName);
+
         public PoetryStorage(IPreferenceStorage preferenceStorage)
         {
             _preferenceStorage = preferenceStorage;
         }
 
-        public Task InitializeAsync()
+        public async Task InitializeAsync()
         {
-            throw new NotImplementedException();
+            await using var dbFileStream = new FileStream(PoetryDbPath, FileMode.OpenOrCreate);
+            await using var dbAssetStream = typeof(PoetryStorage).Assembly.GetManifestResourceStream(DbName);
+            await dbAssetStream.CopyToAsync(dbFileStream);
+            _preferenceStorage.Set(PoetryStorageConst.VersionKey, PoetryStorageConst.Version);
         }
 
         public Task AddAsync(Poetry poetry)
