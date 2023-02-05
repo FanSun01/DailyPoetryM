@@ -1,8 +1,10 @@
 ﻿using DailyPoetryM.Models;
+using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,6 +19,9 @@ namespace DailyPoetryM.Services
         public const string DbName = "poetrydb.sqllite3";
 
         public static readonly string PoetryDbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), DbName);
+
+        private SQLiteAsyncConnection _connection;
+        public SQLiteAsyncConnection Connection => _connection ??= new SQLiteAsyncConnection(PoetryDbPath);
 
         public PoetryStorage(IPreferenceStorage preferenceStorage)
         {
@@ -35,27 +40,28 @@ namespace DailyPoetryM.Services
             _preferenceStorage.Set(PoetryStorageConst.VersionKey, PoetryStorageConst.Version);
         }
 
-        public Task AddAsync(Poetry poetry)
+        public async Task AddAsync(Poetry poetry)
         {
-            throw new NotImplementedException();
+            await Connection.InsertAsync(poetry);
         }
 
-        public Task<Poetry> GetPoetryAsync(int id)
+        public async Task<Poetry> GetPoetryAsync(int id)
         {
-            throw new NotImplementedException();
+            return await Connection.Table<Poetry>().FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public Task<IEnumerable<Poetry>> GetPoetryAsync(Expression<Func<Poetry, bool>> where, int skip, int take)
+        public async Task<IEnumerable<Poetry>> GetPoetryAsync(Expression<Func<Poetry, bool>> where, int skip, int take)
         {
-            throw new NotImplementedException();
+            return await Connection.Table<Poetry>().Where(where).Skip(skip).Take(take).ToListAsync();
         }
+
+        public async Task CloseAsync() => await Connection.CloseAsync();
+
     }
 
     public static class PoetryStorageConst
     {
         public const int Version = 1;
         public const string VersionKey = nameof(PoetryStorageConst) + "." + nameof(Version);
-
-
     }
 }
